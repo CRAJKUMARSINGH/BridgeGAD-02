@@ -5,6 +5,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import tempfile
 import json
 from bridge_generator import BridgeCADGenerator
+from drawing_engine import BridgeDrawingEngine, BridgeRenderer
 from parameter_definitions import PARAMETER_DEFINITIONS, PARAMETER_GROUPS
 from utils.validators import validate_parameters
 
@@ -102,6 +103,50 @@ def generate_pdf():
     request.form = request.form.copy()
     request.form['file_format'] = 'pdf'
     return generate_bridge()
+
+@app.route('/preview', methods=['POST'])
+def preview_bridge():
+    """Show bridge preview before generating files"""
+    try:
+        # Get parameters from form
+        parameters = {}
+        for key in request.form:
+            if key in PARAMETER_DEFINITIONS:
+                param_def = PARAMETER_DEFINITIONS[key]
+                value = request.form[key]
+                try:
+                    if param_def['type'] == 'float':
+                        parameters[key] = float(value)
+                    elif param_def['type'] == 'int':
+                        parameters[key] = int(value)
+                    else:
+                        parameters[key] = value
+                except (ValueError, TypeError) as e:
+                    flash(f"Invalid value for {param_def['name']}: {value}", 'error')
+                    return redirect(url_for('index'))
+        
+        # Validate parameters
+        validation_errors = validate_parameters(parameters)
+        if validation_errors:
+            for error in validation_errors:
+                flash(error, 'error')
+            return redirect(url_for('index'))
+        
+        # Generate drawing data
+        engine = BridgeDrawingEngine(parameters)
+        drawing_data = engine.generate_drawing_data()
+        
+        # Convert to JSON for JavaScript
+        bridge_data_json = json.dumps(parameters)
+        
+        return render_template('preview.html', 
+                             parameters=parameters,
+                             bridge_data=bridge_data_json)
+                             
+    except Exception as e:
+        app.logger.error(f"Error in preview: {str(e)}")
+        flash(f"Error generating preview: {str(e)}", 'error')
+        return redirect(url_for('index'))
 
 @app.route('/validate-parameters', methods=['POST'])
 def validate_parameters_ajax():

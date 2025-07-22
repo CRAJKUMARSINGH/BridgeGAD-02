@@ -65,17 +65,22 @@ def validate_parameters(parameters):
         except (ValueError, TypeError):
             pass
     
-    if 'NSPAN' in parameters and 'LBRIDGE' in parameters and 'SPAN1' in parameters:
+    if 'NSPAN' in parameters and 'LBRIDGE' in parameters:
         try:
             nspan = int(float(parameters['NSPAN']))
             lbridge = float(parameters['LBRIDGE'])
-            span1 = float(parameters['SPAN1'])
             
-            expected_length = nspan * span1
-            tolerance = lbridge * 0.01  # 1% tolerance
+            # Calculate individual span length
+            if nspan > 0:
+                calculated_span_length = lbridge / nspan
+                
+                # Check if spans are reasonable (between 5m and 50m typically)
+                if calculated_span_length < 5000:  # 5m minimum
+                    errors.append(f"Individual span length ({calculated_span_length/1000:.1f}m) is too short. Minimum 5m recommended.")
+                elif calculated_span_length > 50000:  # 50m maximum
+                    errors.append(f"Individual span length ({calculated_span_length/1000:.1f}m) is too long. Maximum 50m recommended.")
             
-            if abs(expected_length - lbridge) > tolerance:
-                errors.append(f"Bridge length ({lbridge}mm) should approximately equal number of spans ({nspan}) × span length ({span1}mm)")
+
         except (ValueError, TypeError):
             pass
     

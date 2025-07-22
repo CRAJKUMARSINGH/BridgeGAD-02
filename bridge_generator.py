@@ -235,50 +235,74 @@ class BridgeCADGenerator:
             logging.error(f"Error generating DXF: {str(e)}")
             raise Exception(f"Failed to generate bridge drawing: {str(e)}")
     
-    def generate_pdf(self):
-        """Generate A4 landscape PDF drawing"""
+    def generate_pdf_from_drawing_data(self, drawing_data):
+        """Generate PDF using unified drawing data"""
         try:
-            logging.info("Starting PDF generation")
+            logging.info("Starting PDF generation with drawing data")
             
-            # Create PDF buffer
+            from drawing_engine import BridgeRenderer
+            
             pdf_buffer = io.BytesIO()
             page_width, page_height = landscape(A4)
             c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
             
-            # Set up drawing parameters
             margin = 20 * mm
             drawing_width = page_width - 2 * margin
             drawing_height = page_height - 2 * margin
             
-            # Get bridge parameters
-            lbridge = float(self.params.get('LBRIDGE', 30000))
-            toprl = float(self.params.get('TOPRL', 110000))
-            sofl = float(self.params.get('SOFL', 108000))
+            # Use drawing data bounds
+            bounds = drawing_data['bounds']
+            bridge_width_mm = bounds['max_x'] - bounds['min_x']
+            bridge_height_mm = bounds['max_y'] - bounds['min_y']
             
-            # Calculate scale to fit on page
-            bridge_width_mm = lbridge / 1000
-            bridge_height_mm = (toprl - sofl) / 1000 + 20  # Add margin for labels
+            # Calculate scale
+            available_width_mm = drawing_width / mm
+            available_height_mm = drawing_height / mm
             
-            scale_x = drawing_width / bridge_width_mm if bridge_width_mm > 0 else 1
-            scale_y = drawing_height / bridge_height_mm if bridge_height_mm > 0 else 1
-            pdf_scale = min(scale_x, scale_y, 1.0)  # Don't scale up
+            scale_x = available_width_mm / bridge_width_mm if bridge_width_mm > 0 else 1
+            scale_y = available_height_mm / bridge_height_mm if bridge_height_mm > 0 else 1
+            pdf_scale = min(scale_x, scale_y, 1.0)
             
-            # Center the drawing
-            scaled_width = bridge_width_mm * pdf_scale
-            scaled_height = bridge_height_mm * pdf_scale
-            offset_x = margin + (drawing_width - scaled_width) / 2
-            offset_y = margin + (drawing_height - scaled_height) / 2
+            logging.info(f"PDF Scale: {pdf_scale}, Bridge: {bridge_width_mm}x{bridge_height_mm}mm")
             
-            # Set line properties
+            # Center drawing
+            final_width_pts = bridge_width_mm * pdf_scale * mm
+            final_height_pts = bridge_height_mm * pdf_scale * mm
+            offset_x = margin + (drawing_width - final_width_pts) / 2
+            offset_y = margin + (drawing_height - final_height_pts) / 2
+            
+            # Transform coordinates
+            def transform_x(x):
+                return offset_x + (x - bounds['min_x']) * pdf_scale * mm
+            
+            def transform_y(y):
+                return offset_y + (bounds['max_y'] - y) * pdf_scale * mm
+            
+            # Set drawing properties
             c.setLineWidth(0.5)
             c.setStrokeColor(black)
             
-            # Draw bridge elements
-            self.draw_bridge_pdf(c, offset_x, offset_y, pdf_scale)
+            # Draw all elements
+            for elem in drawing_data['elements']:
+                if elem['type'] == 'line':
+                    x1 = transform_x(elem['x1'])
+                    y1 = transform_y(elem['y1'])
+                    x2 = transform_x(elem['x2'])
+                    y2 = transform_y(elem['y2'])
+                    c.setLineWidth(elem['width'] * 0.5)
+                    c.line(x1, y1, x2, y2)
             
-            # Save PDF
+            # Draw text
+            for text in drawing_data['texts']:
+                x = transform_x(text['x'])
+                y = transform_y(text['y'])
+                font_size = max(8, text['size'] * pdf_scale / 50)
+                
+                c.setFont("Helvetica", font_size)
+                text_width = c.stringWidth(text['text'], "Helvetica", font_size)
+                c.drawString(x - text_width/2, y, text['text'])
+            
             c.save()
-            
             pdf_content = pdf_buffer.getvalue()
             pdf_buffer.close()
             
@@ -289,7 +313,15 @@ class BridgeCADGenerator:
             logging.error(f"Error generating PDF: {str(e)}")
             raise Exception(f"Failed to generate bridge PDF: {str(e)}")
     
-    def draw_bridge_pdf(self, c, offset_x, offset_y, scale):
+    def generate_pdf(self):
+        """Generate PDF using legacy method"""
+        # Create drawing data and use new method
+        from drawing_engine import BridgeDrawingEngine
+        engine = BridgeDrawingEngine(self.params)
+        drawing_data = engine.generate_drawing_data()
+        return self.generate_pdf_from_drawing_data(drawing_data)
+    
+    def draw_bridge_pdf(self, c, offset_x, offset_y, pdf_scale):
         """Draw bridge elements on PDF"""
         try:
             # Get parameters
@@ -298,48 +330,80 @@ class BridgeCADGenerator:
             sofl = float(self.params.get('SOFL', 108000))
             left_pos = float(self.left)
             
-            # Transform coordinates
+            # Transform coordinates from mm to points with proper scaling
             def transform_x(x_mm):
-                return offset_x + (x_mm / 1000) * scale
+                return offset_x + ((x_mm - left_pos) * pdf_scale * mm)
             
             def transform_y(y_mm):
-                base_y = sofl - 5000  # Base reference
-                return offset_y + ((y_mm - base_y) / 1000) * scale
+                base_y = sofl - 5000  # Base reference in mm
+                return offset_y + ((y_mm - base_y) * pdf_scale * mm)
             
-            # Draw bridge deck and soffit
-            start_x = transform_x(left_pos)
-            end_x = transform_x(left_pos + lbridge)
-            top_y = transform_y(toprl)
-            soffit_y = transform_y(sofl)
-            
-            # Main bridge lines
-            c.line(start_x, top_y, end_x, top_y)  # Top
-            c.line(start_x, soffit_y, end_x, soffit_y)  # Bottom
-            c.line(start_x, soffit_y, start_x, top_y)  # Left end
-            c.line(end_x, soffit_y, end_x, top_y)  # Right end
-            
-            # Draw abutments
+            # Get all required parameters for complete bridge drawing
             abtlen = float(self.params.get('ABTLEN', 10000))
             alfl = float(self.params.get('ALFL', 105000))
             arfl = float(self.params.get('ARFL', 105000))
+            nspan = int(self.params.get('NSPAN', 1))
             
-            # Left abutment
-            left_abt_start = transform_x(left_pos)
-            left_abt_end = transform_x(left_pos + abtlen)
+            # Calculate all drawing coordinates
+            bridge_start_x = transform_x(left_pos)
+            bridge_end_x = transform_x(left_pos + lbridge)
+            deck_top_y = transform_y(toprl)
+            deck_bottom_y = transform_y(sofl)
+            
+            # Draw main bridge deck outline
+            c.line(bridge_start_x, deck_top_y, bridge_end_x, deck_top_y)  # Top deck
+            c.line(bridge_start_x, deck_bottom_y, bridge_end_x, deck_bottom_y)  # Bottom soffit
+            
+            # Draw left abutment details
+            left_abt_front = transform_x(left_pos)
+            left_abt_back = transform_x(left_pos + abtlen)
             left_footing_y = transform_y(alfl)
             
-            c.rect(left_abt_start, left_footing_y,
-                   left_abt_end - left_abt_start,
-                   top_y - left_footing_y, stroke=1, fill=0)
+            # Left abutment outline (not just rectangle)
+            c.line(left_abt_front, left_footing_y, left_abt_back, left_footing_y)  # Bottom
+            c.line(left_abt_back, left_footing_y, left_abt_back, deck_top_y)      # Back wall
+            c.line(left_abt_back, deck_top_y, left_abt_front, deck_top_y)        # Top
+            c.line(left_abt_front, deck_top_y, left_abt_front, deck_bottom_y)    # Front upper
+            c.line(left_abt_front, deck_bottom_y, left_abt_front, left_footing_y) # Front lower
             
-            # Right abutment
-            right_abt_start = transform_x(left_pos + lbridge - abtlen)
-            right_abt_end = transform_x(left_pos + lbridge)
+            # Right abutment details
+            right_abt_front = transform_x(left_pos + lbridge)
+            right_abt_back = transform_x(left_pos + lbridge - abtlen)
             right_footing_y = transform_y(arfl)
             
-            c.rect(right_abt_start, right_footing_y,
-                   right_abt_end - right_abt_start,
-                   top_y - right_footing_y, stroke=1, fill=0)
+            # Right abutment outline
+            c.line(right_abt_back, right_footing_y, right_abt_front, right_footing_y)  # Bottom
+            c.line(right_abt_back, right_footing_y, right_abt_back, deck_top_y)        # Back wall
+            c.line(right_abt_back, deck_top_y, right_abt_front, deck_top_y)           # Top
+            c.line(right_abt_front, deck_top_y, right_abt_front, deck_bottom_y)       # Front upper
+            c.line(right_abt_front, deck_bottom_y, right_abt_front, right_footing_y)  # Front lower
+            
+            # Draw piers if multi-span bridge
+            if nspan > 1:
+                span_length = lbridge / nspan
+                capt = float(self.params.get('CAPT', 109000))
+                capb = float(self.params.get('CAPB', 108000))
+                futrl = float(self.params.get('FUTRL', 105000))
+                piertw = float(self.params.get('PIERTW', 2000))
+                
+                for i in range(1, nspan):
+                    pier_center_x = left_pos + (i * span_length)
+                    pier_x = transform_x(pier_center_x)
+                    pier_half_width = transform_x(pier_center_x + piertw/2) - pier_x
+                    
+                    cap_top_y = transform_y(capt)
+                    cap_bottom_y = transform_y(capb)
+                    foundation_y = transform_y(futrl)
+                    
+                    # Pier outline
+                    pier_left = pier_x - pier_half_width
+                    pier_right = pier_x + pier_half_width
+                    
+                    c.line(pier_left, foundation_y, pier_right, foundation_y)    # Foundation
+                    c.line(pier_right, foundation_y, pier_right, cap_top_y)      # Right side
+                    c.line(pier_right, cap_top_y, pier_left, cap_top_y)         # Top
+                    c.line(pier_left, cap_top_y, pier_left, foundation_y)       # Left side
+                    c.line(pier_left, cap_bottom_y, pier_right, cap_bottom_y)   # Cap division
             
             # Add text labels
             c.setFont("Helvetica-Bold", 12)

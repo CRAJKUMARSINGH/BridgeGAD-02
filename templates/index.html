@@ -83,6 +83,10 @@
                                 <i class="fas fa-undo me-2"></i>
                                 Reset to Defaults
                             </button>
+                            <button type="submit" formaction="{{ url_for('preview_bridge') }}" class="btn btn-info btn-lg me-3">
+                                <i class="fas fa-eye me-2"></i>
+                                Preview Drawing
+                            </button>
                             <div class="btn-group" role="group">
                                 <button type="submit" name="file_format" value="dxf" id="generateDxfBtn" class="btn btn-light btn-lg">
                                     <i class="fas fa-cube me-2"></i>
