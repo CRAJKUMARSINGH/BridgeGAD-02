@@ -31,11 +31,10 @@ def generate_bridge():
         parameters = {}
         for key in request.form:
             if key in PARAMETER_DEFINITIONS:
+                param_def = PARAMETER_DEFINITIONS[key]
+                value = request.form[key]
                 try:
                     # Convert to appropriate type based on parameter definition
-                    param_def = PARAMETER_DEFINITIONS[key]
-                    value = request.form[key]
-                    
                     if param_def['type'] == 'float':
                         parameters[key] = float(value)
                     elif param_def['type'] == 'int':

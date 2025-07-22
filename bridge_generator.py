@@ -1,9 +1,9 @@
 import math
 import os
 import ezdxf
-from ezdxf.entities import Line, Circle, Arc
 from math import atan2, degrees, sqrt, cos, sin, tan, radians, pi
 import logging
+import io
 
 class BridgeCADGenerator:
     """Main class for generating bridge CAD drawings from parameters"""
@@ -44,7 +44,7 @@ class BridgeCADGenerator:
         """Calculate derived values from input parameters"""
         self.scale1 = self.params.get('SCALE1', 100)
         self.scale2 = self.params.get('SCALE2', 100)
-        self.sc = self.scale1 / self.scale2
+        self.sc = self.scale1 / self.scale2 if self.scale2 != 0 else 1
         
         self.skew = self.params.get('SKEW', 0)
         self.skew_rad = self.skew * 0.0174532  # Convert to radians
@@ -52,7 +52,7 @@ class BridgeCADGenerator:
         self.cos_skew = math.cos(self.skew_rad)
         self.tan_skew = self.sin_skew / self.cos_skew if self.cos_skew != 0 else 0
         
-        self.datum = self.params.get('DATUM', 100)
+        self.datum = self.params.get('DATUM', 100000)
         self.left = self.params.get('LEFT', 0)
         
         # Vertical and horizontal scale factors
@@ -77,7 +77,7 @@ class BridgeCADGenerator:
     
     def add_text(self, text, insert, height, rotation=0):
         """Add text to the drawing"""
-        self.msp.add_text(text, dxfattribs={
+        self.msp.add_text(str(text), dxfattribs={
             'height': height, 
             'insert': insert, 
             'rotation': rotation
@@ -104,15 +104,17 @@ class BridgeCADGenerator:
         toprl = self.params.get('TOPRL', 110000)
         sofl = self.params.get('SOFL', 108000)
         
+        # Convert positions using helper functions
+        left_start = self.hpos(self.left)
+        bridge_end = self.hpos(self.left + lbridge)
+        top_level = self.vpos(toprl)
+        soffit_level = self.vpos(sofl)
+        
         # Draw bridge deck
-        deck_start = (self.hpos(self.left), self.vpos(toprl))
-        deck_end = (self.hpos(self.left + lbridge), self.vpos(toprl))
-        self.msp.add_line(deck_start, deck_end)
+        self.msp.add_line((left_start, top_level), (bridge_end, top_level))
         
         # Draw soffit line
-        soffit_start = (self.hpos(self.left), self.vpos(sofl))
-        soffit_end = (self.hpos(self.left + lbridge), self.vpos(sofl))
-        self.msp.add_line(soffit_start, soffit_end)
+        self.msp.add_line((left_start, soffit_level), (bridge_end, soffit_level))
         
         # Draw abutments
         self.draw_abutments()
@@ -131,22 +133,32 @@ class BridgeCADGenerator:
         arfl = self.params.get('ARFL', 105000)
         toprl = self.params.get('TOPRL', 110000)
         
+        # Convert positions
+        left_abt_start = self.hpos(abtl)
+        left_abt_end = self.hpos(abtl + abtlen)
+        top_level = self.vpos(toprl)
+        left_footing = self.vpos(alfl)
+        
         # Left abutment outline
         left_abt_points = [
-            (self.hpos(abtl), self.vpos(toprl)),
-            (self.hpos(abtl), self.vpos(alfl)),
-            (self.hpos(abtl + abtlen), self.vpos(alfl)),
-            (self.hpos(abtl + abtlen), self.vpos(toprl))
+            (left_abt_start, top_level),
+            (left_abt_start, left_footing),
+            (left_abt_end, left_footing),
+            (left_abt_end, top_level)
         ]
         self.draw_line(left_abt_points + [left_abt_points[0]])
         
         # Right abutment
         lbridge = self.params.get('LBRIDGE', 30000)
+        right_footing = self.vpos(arfl)
+        right_abt_start = self.hpos(self.left + lbridge - abtlen)
+        right_abt_end = self.hpos(self.left + lbridge)
+        
         right_abt_points = [
-            (self.hpos(self.left + lbridge - abtlen), self.vpos(toprl)),
-            (self.hpos(self.left + lbridge - abtlen), self.vpos(arfl)),
-            (self.hpos(self.left + lbridge), self.vpos(arfl)),
-            (self.hpos(self.left + lbridge), self.vpos(toprl))
+            (right_abt_start, top_level),
+            (right_abt_start, right_footing),
+            (right_abt_end, right_footing),
+            (right_abt_end, top_level)
         ]
         self.draw_line(right_abt_points + [right_abt_points[0]])
     
@@ -164,45 +176,51 @@ class BridgeCADGenerator:
         for i in range(1, nspan):
             pier_x = self.left + (i * span_length)
             
-            # Pier cap
-            cap_start = (self.hpos(pier_x - piertw/2), self.vpos(capt))
-            cap_end = (self.hpos(pier_x + piertw/2), self.vpos(capt))
-            self.msp.add_line(cap_start, cap_end)
+            # Convert positions
+            pier_center = self.hpos(pier_x)
+            pier_left = self.hpos(pier_x - piertw/2)
+            pier_right = self.hpos(pier_x + piertw/2)
+            cap_top = self.vpos(capt)
+            cap_bottom = self.vpos(capb)
+            foundation = self.vpos(futrl)
             
-            cap_bottom_start = (self.hpos(pier_x - piertw/2), self.vpos(capb))
-            cap_bottom_end = (self.hpos(pier_x + piertw/2), self.vpos(capb))
-            self.msp.add_line(cap_bottom_start, cap_bottom_end)
+            # Pier cap
+            self.msp.add_line((pier_left, cap_top), (pier_right, cap_top))
+            self.msp.add_line((pier_left, cap_bottom), (pier_right, cap_bottom))
             
             # Pier shaft
             pier_points = [
-                (self.hpos(pier_x - piertw/2), self.vpos(capb)),
-                (self.hpos(pier_x - piertw/2), self.vpos(futrl)),
-                (self.hpos(pier_x + piertw/2), self.vpos(futrl)),
-                (self.hpos(pier_x + piertw/2), self.vpos(capb))
+                (pier_left, cap_bottom),
+                (pier_left, foundation),
+                (pier_right, foundation),
+                (pier_right, cap_bottom)
             ]
             self.draw_line(pier_points + [pier_points[0]])
     
     def add_dimensions_and_labels(self):
         """Add dimensions and labels to the drawing"""
         # Add title
-        title_x = self.hpos(self.left + self.params.get('LBRIDGE', 30000) / 2)
-        title_y = self.vpos(self.params.get('TOPRL', 110000) + 2000)
+        lbridge = self.params.get('LBRIDGE', 30000)
+        toprl = self.params.get('TOPRL', 110000)
+        
+        title_x = self.hpos(self.left + lbridge / 2)
+        title_y = self.vpos(toprl + 2000)
         self.add_text("SLAB BRIDGE ELEVATION", (title_x, title_y), 800)
         
         # Add scale note
         scale_text = f"SCALE 1:{self.scale1}"
         scale_x = self.hpos(self.left)
-        scale_y = self.vpos(self.params.get('TOPRL', 110000) + 1000)
+        scale_y = self.vpos(toprl + 1000)
         self.add_text(scale_text, (scale_x, scale_y), 400)
         
         # Add span labels
         nspan = int(self.params.get('NSPAN', 1))
-        lbridge = self.params.get('LBRIDGE', 30000)
         span_length = lbridge / nspan
+        sofl = self.params.get('SOFL', 108000)
         
         for i in range(nspan):
             span_center_x = self.hpos(self.left + (i + 0.5) * span_length)
-            span_y = self.vpos(self.params.get('SOFL', 108000) - 1000)
+            span_y = self.vpos(sofl - 1000)
             span_text = f"SPAN {i+1} = {span_length/1000:.1f}M"
             self.add_text(span_text, (span_center_x, span_y), 300)
     
@@ -215,13 +233,14 @@ class BridgeCADGenerator:
             # Add dimensions and labels
             self.add_dimensions_and_labels()
             
-            # Save to bytes
-            import io
-            output = io.BytesIO()
-            self.doc.write(output)
-            output.seek(0)
+            # Save to string buffer and convert to bytes
+            string_buffer = io.StringIO()
+            self.doc.write(string_buffer)
+            dxf_content = string_buffer.getvalue()
+            string_buffer.close()
             
-            return output.read()
+            # Convert to bytes for download
+            return dxf_content.encode('utf-8')
             
         except Exception as e:
             logging.error(f"Error generating DXF: {str(e)}")
