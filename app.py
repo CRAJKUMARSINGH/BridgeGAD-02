@@ -172,6 +172,31 @@ def preview_bridge():
         flash(f"Error generating preview: {str(e)}", 'error')
         return redirect(url_for('index'))
 
+@app.route('/get-drawing-data', methods=['POST'])
+def get_drawing_data():
+    """Get drawing data for preview rendering"""
+    try:
+        parameters = request.get_json()
+        
+        # Add defaults if missing
+        defaults = {
+            'LBRIDGE': 30000.0, 'NSPAN': 1, 'TOPRL': 110000.0, 'SOFL': 108000.0,
+            'LEFT': 0.0, 'ABTLEN': 10000.0, 'ALFL': 105000.0, 'ARFL': 105000.0
+        }
+        for key, default_value in defaults.items():
+            if key not in parameters:
+                parameters[key] = default_value
+        
+        # Generate drawing data
+        engine = BridgeDrawingEngine(parameters)
+        drawing_data = engine.generate_drawing_data()
+        
+        return jsonify(drawing_data)
+        
+    except Exception as e:
+        app.logger.error(f"Error getting drawing data: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/validate-parameters', methods=['POST'])
 def validate_parameters_ajax():
     """AJAX endpoint for real-time parameter validation"""
