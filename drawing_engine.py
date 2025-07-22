@@ -38,19 +38,26 @@ class BridgeDrawingEngine:
             'max_y': toprl + 5000
         }
         
-        # Draw main bridge deck
-        self.add_line(left, toprl, left + lbridge, toprl, 'deck', 2)
+        # Draw main bridge deck and soffit
+        self.add_line(left, toprl, left + lbridge, toprl, 'deck', 3)
         self.add_line(left, sofl, left + lbridge, sofl, 'soffit', 2)
         
+        # Connect deck to soffit at ends
+        self.add_line(left, toprl, left, sofl, 'deck_end', 2)
+        self.add_line(left + lbridge, toprl, left + lbridge, sofl, 'deck_end', 2)
+        
         # Draw left abutment
-        self.draw_abutment('left', left, abtlen, toprl, sofl, alfl)
+        self.draw_abutment('left', left, abtlen, toprl, alfl)
         
         # Draw right abutment  
-        self.draw_abutment('right', left + lbridge - abtlen, abtlen, toprl, sofl, arfl)
+        self.draw_abutment('right', left + lbridge - abtlen, abtlen, toprl, arfl)
         
         # Draw piers if multi-span
         if nspan > 1:
-            self.draw_piers(left, lbridge, nspan)
+            self.draw_piers(left, lbridge, nspan, toprl, sofl)
+            
+        # Draw wing walls
+        self.draw_wingwalls(left, lbridge, toprl, alfl, arfl)
             
         # Add labels and dimensions
         self.add_labels_and_dimensions()
@@ -81,24 +88,29 @@ class BridgeDrawingEngine:
             'layer': layer
         })
     
-    def draw_abutment(self, side, x_start, width, top_level, soffit_level, footing_level):
+    def draw_abutment(self, side, x_start, width, top_level, footing_level):
         """Draw abutment structure"""
+        # Get soffit level from parameters
+        soffit_level = float(self.params.get('SOFL', 108000))
+        
         if side == 'left':
-            # Left abutment - front face on left
+            # Left abutment - vertical face at bridge start
             self.add_line(x_start, footing_level, x_start + width, footing_level, 'abutment', 1)  # Bottom
             self.add_line(x_start + width, footing_level, x_start + width, top_level, 'abutment', 1)  # Back wall
-            self.add_line(x_start + width, top_level, x_start, top_level, 'abutment', 1)  # Top
             self.add_line(x_start, top_level, x_start, soffit_level, 'abutment', 1)  # Front upper
             self.add_line(x_start, soffit_level, x_start, footing_level, 'abutment', 1)  # Front lower
+            # Connect soffit to back wall
+            self.add_line(x_start, soffit_level, x_start + width, soffit_level, 'abutment', 1)
         else:
-            # Right abutment - front face on right
+            # Right abutment - vertical face at bridge end
             self.add_line(x_start, footing_level, x_start + width, footing_level, 'abutment', 1)  # Bottom
             self.add_line(x_start, footing_level, x_start, top_level, 'abutment', 1)  # Back wall
-            self.add_line(x_start, top_level, x_start + width, top_level, 'abutment', 1)  # Top
             self.add_line(x_start + width, top_level, x_start + width, soffit_level, 'abutment', 1)  # Front upper
             self.add_line(x_start + width, soffit_level, x_start + width, footing_level, 'abutment', 1)  # Front lower
+            # Connect soffit to back wall
+            self.add_line(x_start, soffit_level, x_start + width, soffit_level, 'abutment', 1)
     
-    def draw_piers(self, left, lbridge, nspan):
+    def draw_piers(self, left, lbridge, nspan, toprl, sofl):
         """Draw bridge piers"""
         span_length = lbridge / nspan
         capt = float(self.params.get('CAPT', 109000))
@@ -116,7 +128,31 @@ class BridgeDrawingEngine:
             self.add_line(pier_right, futrl, pier_right, capt, 'pier', 1)  # Right side
             self.add_line(pier_right, capt, pier_left, capt, 'pier', 1)  # Top
             self.add_line(pier_left, capt, pier_left, futrl, 'pier', 1)  # Left side
-            self.add_line(pier_left, capb, pier_right, capb, 'pier', 1)  # Cap division
+            
+            # Cap at soffit level
+            if capb != capt:
+                self.add_line(pier_left, capb, pier_right, capb, 'pier', 1)  # Cap division
+                
+    def draw_wingwalls(self, left, lbridge, toprl, alfl, arfl):
+        """Draw wing walls at abutments"""
+        winglen = float(self.params.get('WINGLEN', 5000))  # Wing wall length
+        
+        # Left wing walls
+        # Front wing wall
+        self.add_line(left - winglen, alfl, left, alfl, 'wingwall', 1)
+        self.add_line(left - winglen, alfl, left - winglen, toprl, 'wingwall', 1)
+        # Back wing wall
+        abtlen = float(self.params.get('ABTLEN', 10000))
+        self.add_line(left + abtlen, alfl, left + abtlen + winglen, alfl, 'wingwall', 1)
+        self.add_line(left + abtlen + winglen, alfl, left + abtlen + winglen, toprl, 'wingwall', 1)
+        
+        # Right wing walls
+        # Front wing wall
+        self.add_line(left + lbridge, arfl, left + lbridge + winglen, arfl, 'wingwall', 1)
+        self.add_line(left + lbridge + winglen, arfl, left + lbridge + winglen, toprl, 'wingwall', 1)
+        # Back wing wall
+        self.add_line(left + lbridge - abtlen - winglen, arfl, left + lbridge - abtlen, arfl, 'wingwall', 1)
+        self.add_line(left + lbridge - abtlen - winglen, arfl, left + lbridge - abtlen - winglen, toprl, 'wingwall', 1)
     
     def add_labels_and_dimensions(self):
         """Add text labels and dimensions"""
