@@ -53,25 +53,55 @@ def generate_bridge():
                 flash(error, 'error')
             return redirect(url_for('index'))
         
+        # Get file format from form
+        file_format = request.form.get('file_format', 'dxf')
+        
         # Generate the bridge CAD
         generator = BridgeCADGenerator(parameters)
-        dxf_data = generator.generate_dxf()
         
-        # Create temporary file for download
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.dxf')
-        temp_file.write(dxf_data)
-        temp_file.close()
-        
-        flash('Bridge drawing generated successfully!', 'success')
-        return send_file(temp_file.name, 
-                        as_attachment=True, 
-                        download_name='bridge_drawing.dxf',
-                        mimetype='application/dxf')
+        if file_format == 'pdf':
+            # Generate PDF
+            pdf_data = generator.generate_pdf()
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
+            temp_file.write(pdf_data)
+            temp_file.close()
+            
+            flash('Bridge PDF generated successfully!', 'success')
+            return send_file(temp_file.name, 
+                            as_attachment=True, 
+                            download_name='bridge_drawing.pdf',
+                            mimetype='application/pdf')
+        else:
+            # Generate DXF
+            dxf_data = generator.generate_dxf()
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.dxf')
+            temp_file.write(dxf_data)
+            temp_file.close()
+            
+            flash('Bridge DXF generated successfully!', 'success')
+            return send_file(temp_file.name, 
+                            as_attachment=True, 
+                            download_name='bridge_drawing.dxf',
+                            mimetype='application/dxf')
                         
     except Exception as e:
         app.logger.error(f"Error generating bridge: {str(e)}")
         flash(f"Error generating bridge: {str(e)}", 'error')
         return redirect(url_for('index'))
+
+@app.route('/generate-dxf', methods=['POST'])
+def generate_dxf():
+    """Generate DXF file specifically"""
+    request.form = request.form.copy()
+    request.form['file_format'] = 'dxf'
+    return generate_bridge()
+
+@app.route('/generate-pdf', methods=['POST'])
+def generate_pdf():
+    """Generate PDF file specifically"""
+    request.form = request.form.copy()
+    request.form['file_format'] = 'pdf'
+    return generate_bridge()
 
 @app.route('/validate-parameters', methods=['POST'])
 def validate_parameters_ajax():

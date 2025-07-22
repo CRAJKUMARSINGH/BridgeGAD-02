@@ -83,10 +83,16 @@
                                 <i class="fas fa-undo me-2"></i>
                                 Reset to Defaults
                             </button>
-                            <button type="submit" id="generateBtn" class="btn btn-light btn-lg">
-                                <i class="fas fa-download me-2"></i>
-                                Generate DXF Drawing
-                            </button>
+                            <div class="btn-group" role="group">
+                                <button type="submit" name="file_format" value="dxf" id="generateDxfBtn" class="btn btn-light btn-lg">
+                                    <i class="fas fa-cube me-2"></i>
+                                    Generate DXF
+                                </button>
+                                <button type="submit" name="file_format" value="pdf" id="generatePdfBtn" class="btn btn-warning btn-lg">
+                                    <i class="fas fa-file-pdf me-2"></i>
+                                    Generate PDF
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -134,9 +140,9 @@
                             <h6>Output Information:</h6>
                             <ul class="list-unstyled">
                                 <li><i class="fas fa-arrow-right text-success me-2"></i>DXF file compatible with AutoCAD</li>
-                                <li><i class="fas fa-arrow-right text-success me-2"></i>Includes elevation and section views</li>
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>PDF file for A4 landscape printing</li>
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>Full-scale technical drawings</li>
                                 <li><i class="fas fa-arrow-right text-success me-2"></i>Professional dimensioning and labels</li>
-                                <li><i class="fas fa-arrow-right text-success me-2"></i>Engineering standard line weights</li>
                             </ul>
                         </div>
                     </div>
