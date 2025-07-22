@@ -108,33 +108,57 @@ def generate_pdf():
 def preview_bridge():
     """Show bridge preview before generating files"""
     try:
-        # Get parameters from form
+        app.logger.info(f"Preview request received with data: {dict(request.form)}")
+        
+        # Get parameters from form - include ALL form data, not just defined parameters
         parameters = {}
-        for key in request.form:
+        for key, value in request.form.items():
             if key in PARAMETER_DEFINITIONS:
                 param_def = PARAMETER_DEFINITIONS[key]
-                value = request.form[key]
                 try:
                     if param_def['type'] == 'float':
-                        parameters[key] = float(value)
+                        parameters[key] = float(value) if value else 0.0
                     elif param_def['type'] == 'int':
-                        parameters[key] = int(value)
+                        parameters[key] = int(float(value)) if value else 0
                     else:
                         parameters[key] = value
                 except (ValueError, TypeError) as e:
-                    flash(f"Invalid value for {param_def['name']}: {value}", 'error')
-                    return redirect(url_for('index'))
+                    app.logger.warning(f"Invalid value for {key}: {value}, using default")
+                    # Use default values for invalid inputs
+                    if param_def['type'] == 'float':
+                        parameters[key] = param_def.get('default', 0.0)
+                    elif param_def['type'] == 'int':
+                        parameters[key] = param_def.get('default', 0)
+                    else:
+                        parameters[key] = param_def.get('default', '')
+            
+        # Add default values for missing required parameters
+        defaults = {
+            'LBRIDGE': 30000.0,
+            'NSPAN': 1,
+            'TOPRL': 110000.0,
+            'SOFL': 108000.0,
+            'LEFT': 0.0,
+            'ABTLEN': 10000.0,
+            'ALFL': 105000.0,
+            'ARFL': 105000.0,
+            'SCALE1': 100,
+            'SCALE2': 1,
+            'CCBR': 50.0
+        }
         
-        # Validate parameters
-        validation_errors = validate_parameters(parameters)
-        if validation_errors:
-            for error in validation_errors:
-                flash(error, 'error')
-            return redirect(url_for('index'))
+        for key, default_value in defaults.items():
+            if key not in parameters:
+                parameters[key] = default_value
+                
+        app.logger.info(f"Final parameters for preview: {parameters}")
         
+        # Skip validation for preview - just show the drawing
         # Generate drawing data
         engine = BridgeDrawingEngine(parameters)
         drawing_data = engine.generate_drawing_data()
+        
+        app.logger.info(f"Drawing data generated: {len(drawing_data['elements'])} elements, {len(drawing_data['texts'])} texts")
         
         # Convert to JSON for JavaScript
         bridge_data_json = json.dumps(parameters)
@@ -144,7 +168,7 @@ def preview_bridge():
                              bridge_data=bridge_data_json)
                              
     except Exception as e:
-        app.logger.error(f"Error in preview: {str(e)}")
+        app.logger.error(f"Error in preview: {str(e)}", exc_info=True)
         flash(f"Error generating preview: {str(e)}", 'error')
         return redirect(url_for('index'))
 
