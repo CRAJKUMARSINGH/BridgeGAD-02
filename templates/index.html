@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Header Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="text-center">
+                <h1 class="display-4 text-primary">
+                    <i class="fas fa-bridge me-3"></i>
+                    Slab Bridge CAD Generator
+                </h1>
+                <p class="lead text-muted">
+                    Professional engineering tool for generating accurate DXF drawings of slab bridges
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parameter Input Form -->
+    <form id="bridgeForm" method="POST" action="{{ url_for('generate_bridge') }}" novalidate>
+        <div class="row">
+            <!-- Parameter Groups -->
+            {% for group_name, param_list in parameter_groups.items() %}
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-{{ 'cog' if group_name == 'General' else 'ruler' if group_name == 'Bridge Geometry' else 'layer-group' if group_name == 'Slab Design' else 'building' if group_name == 'Abutments' else 'columns' if group_name == 'Piers' else 'road' }} me-2"></i>
+                            {{ group_name }} Parameters
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for param_key in param_list %}
+                                {% if param_key in parameter_definitions %}
+                                    {% set param = parameter_definitions[param_key] %}
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="{{ param_key }}" class="form-label">
+                                                {{ param.name }}
+                                                {% if param.unit %}
+                                                    <small class="text-muted">({{ param.unit }})</small>
+                                                {% endif %}
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="{{ param.description }}"></i>
+                                            </label>
+                                            <input type="{{ 'number' if param.type in ['int', 'float'] else 'text' }}" 
+                                                   class="form-control parameter-input" 
+                                                   id="{{ param_key }}" 
+                                                   name="{{ param_key }}" 
+                                                   value="{{ param.default }}"
+                                                   {% if param.type in ['int', 'float'] %}
+                                                       {% if 'min' in param %}min="{{ param.min }}"{% endif %}
+                                                       {% if 'max' in param %}max="{{ param.max }}"{% endif %}
+                                                       {% if param.type == 'float' %}step="0.1"{% else %}step="1"{% endif %}
+                                                   {% endif %}
+                                                   data-param-key="{{ param_key }}">
+                                            <div class="invalid-feedback" id="{{ param_key }}_error"></div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card bg-primary">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-center align-items-center flex-wrap gap-3">
+                            <button type="button" id="validateBtn" class="btn btn-outline-light">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Validate Parameters
+                            </button>
+                            <button type="button" id="resetBtn" class="btn btn-outline-light">
+                                <i class="fas fa-undo me-2"></i>
+                                Reset to Defaults
+                            </button>
+                            <button type="submit" id="generateBtn" class="btn btn-light btn-lg">
+                                <i class="fas fa-download me-2"></i>
+                                Generate DXF Drawing
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Validation Results -->
+    <div id="validationResults" class="mt-4" style="display: none;">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-clipboard-check me-2"></i>
+                    Parameter Validation Results
+                </h6>
+            </div>
+            <div class="card-body">
+                <div id="validationContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Engineering Notes -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-info">
+                <div class="card-header bg-info">
+                    <h6 class="card-title text-white mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Engineering Notes
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Parameter Guidelines:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-arrow-right text-primary me-2"></i>All dimensions in millimeters unless noted</li>
+                                <li><i class="fas fa-arrow-right text-primary me-2"></i>Bridge length should match span count × span length</li>
+                                <li><i class="fas fa-arrow-right text-primary me-2"></i>Top RL must be above soffit level</li>
+                                <li><i class="fas fa-arrow-right text-primary me-2"></i>Slab thickness: center > edge > tip</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Output Information:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>DXF file compatible with AutoCAD</li>
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>Includes elevation and section views</li>
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>Professional dimensioning and labels</li>
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>Engineering standard line weights</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Initialize tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+});
+</script>
+{% endblock %}

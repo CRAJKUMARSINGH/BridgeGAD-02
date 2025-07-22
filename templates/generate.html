@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+
+{% block title %}Generation Results - Slab Bridge CAD Generator{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="text-center">
+                <h1 class="display-5 text-primary">
+                    <i class="fas fa-cogs me-3"></i>
+                    DXF Generation Results
+                </h1>
+                <p class="lead text-muted">
+                    Bridge CAD drawing generation status and results
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generation Status -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-success">
+                <div class="card-header bg-success">
+                    <h5 class="card-title text-white mb-0">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Generation Complete
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6 class="text-success mb-2">
+                                <i class="fas fa-file-download me-2"></i>
+                                DXF File Successfully Generated
+                            </h6>
+                            <p class="mb-0 text-muted">
+                                Your bridge CAD drawing has been created with all specified parameters. 
+                                The DXF file is ready for download and can be opened in AutoCAD or compatible software.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <div class="status-indicator ready"></div>
+                            <span class="fw-bold text-success">Ready</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generation Progress (for future enhancement) -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-tasks me-2"></i>
+                        Generation Process
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="progress-steps">
+                        <div class="step completed">
+                            <div class="step-icon">
+                                <i class="fas fa-check text-success"></i>
+                            </div>
+                            <div class="step-content">
+                                <h6 class="step-title">Parameter Validation</h6>
+                                <p class="step-desc text-muted mb-0">All parameters validated successfully</p>
+                            </div>
+                        </div>
+                        <div class="step completed">
+                            <div class="step-icon">
+                                <i class="fas fa-check text-success"></i>
+                            </div>
+                            <div class="step-content">
+                                <h6 class="step-title">CAD Document Setup</h6>
+                                <p class="step-desc text-muted mb-0">DXF document initialized with proper settings</p>
+                            </div>
+                        </div>
+                        <div class="step completed">
+                            <div class="step-icon">
+                                <i class="fas fa-check text-success"></i>
+                            </div>
+                            <div class="step-content">
+                                <h6 class="step-title">Bridge Elements Drawing</h6>
+                                <p class="step-desc text-muted mb-0">Elevation, abutments, piers, and slab drawn</p>
+                            </div>
+                        </div>
+                        <div class="step completed">
+                            <div class="step-icon">
+                                <i class="fas fa-check text-success"></i>
+                            </div>
+                            <div class="step-content">
+                                <h6 class="step-title">Dimensions & Labels</h6>
+                                <p class="step-desc text-muted mb-0">Professional dimensioning and labels added</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Information -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-file-alt me-2"></i>
+                        File Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Filename:</strong></td>
+                            <td>bridge_drawing.dxf</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Format:</strong></td>
+                            <td>AutoCAD DXF R2010</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Generated:</strong></td>
+                            <td id="generation-time"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Status:</strong></td>
+                            <td><span class="badge bg-success">Ready for Download</span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mt-3 mt-md-0">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Drawing Contents
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li><i class="fas fa-check text-success me-2"></i>Bridge elevation view</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Abutment details</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Pier configurations</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Slab cross-sections</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Dimension lines</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Engineering labels</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Scale annotations</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-center align-items-center flex-wrap gap-3">
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-light">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Generate Another Drawing
+                        </a>
+                        <button type="button" id="downloadBtn" class="btn btn-light btn-lg">
+                            <i class="fas fa-download me-2"></i>
+                            Download DXF File
+                        </button>
+                        <button type="button" id="copyParamsBtn" class="btn btn-outline-light">
+                            <i class="fas fa-copy me-2"></i>
+                            Copy Parameters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage Instructions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-info">
+                <div class="card-header bg-info">
+                    <h6 class="card-title text-white mb-0">
+                        <i class="fas fa-question-circle me-2"></i>
+                        How to Use Your DXF File
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Opening the File:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-arrow-right text-primary me-2"></i>Open with AutoCAD 2010 or newer</li>
+                                <li><i class="fas fa-arrow-right text-primary me-2"></i>Compatible with DraftSight, LibreCAD</li>
+                                <li><i class="fas fa-arrow-right text-primary me-2"></i>Import into other CAD software</li>
+                                <li><i class="fas fa-arrow-right text-primary me-2"></i>View with free DXF viewers</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Engineering Standards:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>All dimensions in millimeters</li>
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>Professional line weights applied</li>
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>Standard engineering symbols used</li>
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>Proper layer organization</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                <strong>Tip:</strong> The generated drawing follows industry standards and can be used directly 
+                                for construction documentation, further design development, or as a reference for detailed engineering drawings.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS for this page -->
+<style>
+.progress-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.3s ease;
+}
+
+.step.completed {
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.step-icon {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: rgba(40, 167, 69, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bs-success);
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-title {
+    color: var(--bs-success);
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+}
+
+.step-desc {
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .progress-steps {
+        gap: 0.75rem;
+    }
+    
+    .step {
+        padding: 0.5rem;
+    }
+    
+    .step-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set generation time
+    const generationTimeElement = document.getElementById('generation-time');
+    if (generationTimeElement) {
+        generationTimeElement.textContent = new Date().toLocaleString();
+    }
+    
+    // Download button functionality
+    const downloadBtn = document.getElementById('downloadBtn');
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', function() {
+            // This would typically trigger the actual download
+            // For now, it redirects to the generate endpoint which handles the download
+            window.location.href = '/generate';
+        });
+    }
+    
+    // Copy parameters functionality
+    const copyParamsBtn = document.getElementById('copyParamsBtn');
+    if (copyParamsBtn) {
+        copyParamsBtn.addEventListener('click', function() {
+            if (window.BridgeCADUtils && window.BridgeCADUtils.copyParametersToClipboard) {
+                window.BridgeCADUtils.copyParametersToClipboard();
+            } else {
+                // Fallback notification
+                const toast = document.createElement('div');
+                toast.className = 'alert alert-info position-fixed';
+                toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
+                toast.innerHTML = `
+                    Parameter copy feature available on main form
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 3000);
+            }
+        });
+    }
+    
+    // Add animation to progress steps
+    const steps = document.querySelectorAll('.step');
+    steps.forEach((step, index) => {
+        setTimeout(() => {
+            step.style.opacity = '0';
+            step.style.transform = 'translateX(-20px)';
+            step.style.transition = 'all 0.3s ease';
+            
+            requestAnimationFrame(() => {
+                step.style.opacity = '1';
+                step.style.transform = 'translateX(0)';
+            });
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

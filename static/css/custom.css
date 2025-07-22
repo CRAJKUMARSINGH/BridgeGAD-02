@@ -1,0 +1,221 @@
+/* Custom styles for the Bridge CAD Generator */
+
+:root {
+    --engineering-blue: #2c5aa0;
+    --engineering-gray: #6c757d;
+    --engineering-green: #28a745;
+    --technical-border: #495057;
+}
+
+/* Engineering-focused form styling */
+.parameter-input {
+    font-family: 'Courier New', monospace;
+    border: 2px solid var(--bs-border-color);
+    transition: all 0.3s ease;
+}
+
+.parameter-input:focus {
+    border-color: var(--engineering-blue);
+    box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
+}
+
+.parameter-input.is-valid {
+    border-color: var(--engineering-green);
+}
+
+.parameter-input.is-invalid {
+    border-color: var(--bs-danger);
+}
+
+/* Card enhancements for technical appearance */
+.card {
+    border: 1px solid var(--technical-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, var(--engineering-blue) 100%);
+    border-bottom: 2px solid var(--technical-border);
+}
+
+.card-header h5, .card-header h6 {
+    color: white;
+    font-weight: 600;
+}
+
+/* Button styling for professional appearance */
+.btn-outline-light:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.btn-lg {
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Form validation styling */
+.is-valid {
+    border-color: var(--engineering-green) !important;
+}
+
+.is-invalid {
+    border-color: var(--bs-danger) !important;
+}
+
+.valid-feedback {
+    color: var(--engineering-green);
+}
+
+.invalid-feedback {
+    color: var(--bs-danger);
+    font-size: 0.875rem;
+}
+
+/* Loading state styling */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Technical documentation styling */
+.engineering-note {
+    background: linear-gradient(135deg, var(--bs-info) 0%, var(--engineering-blue) 100%);
+    color: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .btn-lg {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .card-body .row .col-md-6 {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Animation for validation results */
+.validation-slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Technical drawing preview area */
+.drawing-preview {
+    background: #f8f9fa;
+    border: 2px dashed var(--technical-border);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    color: var(--engineering-gray);
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.drawing-preview.active {
+    border-color: var(--engineering-blue);
+    background: rgba(44, 90, 160, 0.05);
+}
+
+/* Status indicators */
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.status-indicator.ready {
+    background-color: var(--engineering-green);
+}
+
+.status-indicator.error {
+    background-color: var(--bs-danger);
+}
+
+.status-indicator.processing {
+    background-color: var(--bs-warning);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Form group spacing */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--bs-body-color);
+    margin-bottom: 0.5rem;
+}
+
+/* Icon styling */
+.fas, .far {
+    color: inherit;
+}
+
+.text-primary .fas {
+    color: var(--bs-primary) !important;
+}
+
+/* Footer styling */
+footer {
+    margin-top: auto;
+}
+
+/* Navigation enhancements */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.navbar-nav .nav-link {
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
