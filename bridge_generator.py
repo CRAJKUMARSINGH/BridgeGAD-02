@@ -313,13 +313,7 @@ class BridgeCADGenerator:
             logging.error(f"Error generating PDF: {str(e)}")
             raise Exception(f"Failed to generate bridge PDF: {str(e)}")
     
-    def generate_pdf(self):
-        """Generate PDF using legacy method"""
-        # Create drawing data and use new method
-        from drawing_engine import BridgeDrawingEngine
-        engine = BridgeDrawingEngine(self.params)
-        drawing_data = engine.generate_drawing_data()
-        return self.generate_pdf_from_drawing_data(drawing_data)
+    
     
     def draw_bridge_pdf(self, c, offset_x, offset_y, pdf_scale):
         """Draw bridge elements on PDF"""

@@ -49,75 +49,7 @@ class BridgeDrawingEngine:
         """Scaled horizontal position like original"""
         return self.left + self.sc * self.hhs * (a - self.left)
         
-    def generate_drawing_data(self):
-        """Generate complete drawing data with all elements - matching original accuracy"""
-        self.elements.clear()
-        self.texts.clear()
-        
-        # Get all parameters like original program
-        lbridge = float(self.params.get('LBRIDGE', 30000))
-        toprl = float(self.params.get('TOPRL', 110000))
-        sofl = float(self.params.get('SOFL', 108000))
-        left = float(self.params.get('LEFT', 0))
-        right = float(self.params.get('RIGHT', 50000))
-        abtlen = float(self.params.get('ABTLEN', 10000))
-        alfl = float(self.params.get('ALFL', 105000))
-        arfl = float(self.params.get('ARFL', 105000))
-        nspan = int(self.params.get('NSPAN', 1))
-        span1 = float(self.params.get('SPAN1', 30000))
-        
-        # Abutment parameters like original
-        alcw = float(self.params.get('ALCW', 1200))  # Abutment Left Cap Width
-        alcd = float(self.params.get('ALCD', 800))   # Abutment Left Cap Depth
-        dwth = float(self.params.get('DWTH', 300))   # Dirt wall thickness
-        alfb = float(self.params.get('ALFB', 0.1))   # Front batter
-        altb = float(self.params.get('ALTB', 0.1))   # Toe batter
-        albb = float(self.params.get('ALBB', 0.05))  # Back batter
-        alfo = float(self.params.get('ALFO', 500))   # Front offset
-        alfd = float(self.params.get('ALFD', 1000))  # Footing depth
-        
-        # Pier parameters
-        capt = float(self.params.get('CAPT', 109000))
-        capb = float(self.params.get('CAPB', 108000))
-        piertw = float(self.params.get('PIERTW', 1500))
-        futrl = float(self.params.get('FUTRL', 100000))
-        futd = float(self.params.get('FUTD', 2000))
-        futw = float(self.params.get('FUTW', 3000))
-        futl = float(self.params.get('FUTL', 8000))
-        
-        # Approach slab
-        laslab = float(self.params.get('LASLAB', 5000))
-        apwth = float(self.params.get('APWTH', 8000))
-        apthk = float(self.params.get('APTHK', 200))
-        
-        # Calculate precise bounds like original program
-        min_x = left - laslab - 2000
-        max_x = left + lbridge + laslab + 2000
-        min_y = min(alfl, arfl, futrl) - futd - 2000
-        max_y = toprl + 3000
-        
-        self.bounds = {
-            'min_x': min_x,
-            'max_x': max_x,
-            'min_y': min_y,
-            'max_y': max_y
-        }
-        
-        # Draw bridge elements with precise coordinates
-        self.draw_bridge_elevation()
-        self.draw_abutments_detailed()
-        if nspan > 1:
-            self.draw_piers_detailed()
-        self.draw_approach_slabs()
-        self.add_professional_annotations()
-        
-        return {
-            'elements': self.elements,
-            'texts': self.texts,
-            'bounds': self.bounds,
-            'parameters': self.params
-        }
-        
+    
     def draw_bridge_elevation(self):
         """Draw main bridge elevation like original program"""
         lbridge = float(self.params.get('LBRIDGE', 30000))
