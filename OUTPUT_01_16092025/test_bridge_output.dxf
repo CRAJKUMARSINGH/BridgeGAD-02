@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slab Bridge CAD Generator</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="/static/css/custom.css" rel="stylesheet">
+    
+    
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-bridge me-2"></i>
+                Slab Bridge CAD Generator
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    
+        
+            <div class="container mt-3">
+                
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Clear Carriageway Width must be at least 3000
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Kerb Width must be at most 600
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Kerb Depth must be at most 300
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Pier Batter must be at most 0.1
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Left Abutment Front Batter must be at most 0.5
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Left Abutment Toe Batter must be at most 0.5
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Left Abutment Back Batter must be at most 0.3
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                
+            </div>
+        
+    
+
+    <!-- Main Content -->
+    <main>
+        
+<div class="container my-5">
+    <!-- Header Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="text-center">
+                <h1 class="display-4 text-primary">
+                    <i class="fas fa-bridge me-3"></i>
+                    Slab Bridge CAD Generator
+                </h1>
+                <p class="lead text-muted">
+                    Professional engineering tool for generating accurate DXF drawings of slab bridges
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parameter Input Form -->
+    <form id="bridgeForm" method="POST" action="/generate" novalidate>
+        <div class="row">
+            <!-- Parameter Groups -->
+            
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-cog me-2"></i>
+                            General Parameters
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="SCALE1" class="form-label">
+                                                Primary Scale
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Primary drawing scale factor"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="SCALE1" 
+                                                   name="SCALE1" 
+                                                   value="100"
+                                                   
+                                                       min="1"
+                                                       max="1000"
+                                                       step="1"
+                                                   
+                                                   data-param-key="SCALE1">
+                                            <div class="invalid-feedback" id="SCALE1_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="SCALE2" class="form-label">
+                                                Secondary Scale
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Secondary drawing scale factor"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="SCALE2" 
+                                                   name="SCALE2" 
+                                                   value="100"
+                                                   
+                                                       min="1"
+                                                       max="1000"
+                                                       step="1"
+                                                   
+                                                   data-param-key="SCALE2">
+                                            <div class="invalid-feedback" id="SCALE2_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="SKEW" class="form-label">
+                                                Bridge Skew Angle
+                                                
+                                                    <small class="text-muted">(°)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Angle of skew for the bridge in degrees"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="SKEW" 
+                                                   name="SKEW" 
+                                                   value="0"
+                                                   
+                                                       min="-45"
+                                                       max="45"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="SKEW">
+                                            <div class="invalid-feedback" id="SKEW_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="DATUM" class="form-label">
+                                                Drawing Datum
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Reference datum level for the drawing"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="DATUM" 
+                                                   name="DATUM" 
+                                                   value="100000"
+                                                   
+                                                       min="0"
+                                                       max="200000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="DATUM">
+                                            <div class="invalid-feedback" id="DATUM_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="TOPRL" class="form-label">
+                                                Top RL of Bridge
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Top level of the bridge deck"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="TOPRL" 
+                                                   name="TOPRL" 
+                                                   value="110000"
+                                                   
+                                                       min="90000"
+                                                       max="150000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="TOPRL">
+                                            <div class="invalid-feedback" id="TOPRL_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="LEFT" class="form-label">
+                                                Left Chainage
+                                                
+                                                    <small class="text-muted">(m)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Left-most chainage point"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="LEFT" 
+                                                   name="LEFT" 
+                                                   value="0"
+                                                   
+                                                       min="0"
+                                                       max="100000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="LEFT">
+                                            <div class="invalid-feedback" id="LEFT_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="RIGHT" class="form-label">
+                                                Right Chainage
+                                                
+                                                    <small class="text-muted">(m)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Right-most chainage point"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="RIGHT" 
+                                                   name="RIGHT" 
+                                                   value="50000"
+                                                   
+                                                       min="10000"
+                                                       max="200000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="RIGHT">
+                                            <div class="invalid-feedback" id="RIGHT_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="RTL" class="form-label">
+                                                Road Top Level
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Top level of road surface"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="RTL" 
+                                                   name="RTL" 
+                                                   value="110000"
+                                                   
+                                                       min="90000"
+                                                       max="150000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="RTL">
+                                            <div class="invalid-feedback" id="RTL_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-ruler me-2"></i>
+                            Bridge Geometry Parameters
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="NSPAN" class="form-label">
+                                                Number of Spans
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Total number of bridge spans"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="NSPAN" 
+                                                   name="NSPAN" 
+                                                   value="1"
+                                                   
+                                                       min="1"
+                                                       max="10"
+                                                       step="1"
+                                                   
+                                                   data-param-key="NSPAN">
+                                            <div class="invalid-feedback" id="NSPAN_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="LBRIDGE" class="form-label">
+                                                Bridge Length
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Total length of the bridge"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="LBRIDGE" 
+                                                   name="LBRIDGE" 
+                                                   value="30000"
+                                                   
+                                                       min="5000"
+                                                       max="200000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="LBRIDGE">
+                                            <div class="invalid-feedback" id="LBRIDGE_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="SPAN1" class="form-label">
+                                                Individual Span Length
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Length of individual spans"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="SPAN1" 
+                                                   name="SPAN1" 
+                                                   value="30000"
+                                                   
+                                                       min="5000"
+                                                       max="50000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="SPAN1">
+                                            <div class="invalid-feedback" id="SPAN1_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="CCBR" class="form-label">
+                                                Clear Carriageway Width
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Clear width of the carriageway"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="CCBR" 
+                                                   name="CCBR" 
+                                                   value="7500"
+                                                   
+                                                       min="3000"
+                                                       max="20000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="CCBR">
+                                            <div class="invalid-feedback" id="CCBR_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="XINCR" class="form-label">
+                                                X Direction Increment
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Chainage increment in X direction"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="XINCR" 
+                                                   name="XINCR" 
+                                                   value="1000"
+                                                   
+                                                       min="100"
+                                                       max="5000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="XINCR">
+                                            <div class="invalid-feedback" id="XINCR_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="YINCR" class="form-label">
+                                                Y Direction Increment
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Elevation increment in Y direction"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="YINCR" 
+                                                   name="YINCR" 
+                                                   value="1000"
+                                                   
+                                                       min="100"
+                                                       max="5000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="YINCR">
+                                            <div class="invalid-feedback" id="YINCR_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="NOCH" class="form-label">
+                                                Number of Chainages
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Total number of chainages"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="NOCH" 
+                                                   name="NOCH" 
+                                                   value="50"
+                                                   
+                                                       min="10"
+                                                       max="200"
+                                                       step="1"
+                                                   
+                                                   data-param-key="NOCH">
+                                            <div class="invalid-feedback" id="NOCH_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-layer-group me-2"></i>
+                            Slab Design Parameters
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="SLBTHC" class="form-label">
+                                                Slab Thickness at Centre
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Thickness of slab at center"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="SLBTHC" 
+                                                   name="SLBTHC" 
+                                                   value="1000"
+                                                   
+                                                       min="200"
+                                                       max="2000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="SLBTHC">
+                                            <div class="invalid-feedback" id="SLBTHC_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="SLBTHE" class="form-label">
+                                                Slab Thickness at Edge
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Thickness of slab at edge"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="SLBTHE" 
+                                                   name="SLBTHE" 
+                                                   value="800"
+                                                   
+                                                       min="200"
+                                                       max="2000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="SLBTHE">
+                                            <div class="invalid-feedback" id="SLBTHE_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="SLBTHT" class="form-label">
+                                                Slab Thickness at Tip
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Thickness of slab at tip"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="SLBTHT" 
+                                                   name="SLBTHT" 
+                                                   value="600"
+                                                   
+                                                       min="150"
+                                                       max="1500"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="SLBTHT">
+                                            <div class="invalid-feedback" id="SLBTHT_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="SOFL" class="form-label">
+                                                Soffit Level
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Level of the bridge soffit"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="SOFL" 
+                                                   name="SOFL" 
+                                                   value="108000"
+                                                   
+                                                       min="90000"
+                                                       max="148000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="SOFL">
+                                            <div class="invalid-feedback" id="SOFL_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="KERBW" class="form-label">
+                                                Kerb Width
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Width of the kerb"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="KERBW" 
+                                                   name="KERBW" 
+                                                   value="300"
+                                                   
+                                                       min="100"
+                                                       max="600"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="KERBW">
+                                            <div class="invalid-feedback" id="KERBW_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="KERBD" class="form-label">
+                                                Kerb Depth
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Depth of the kerb"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="KERBD" 
+                                                   name="KERBD" 
+                                                   value="150"
+                                                   
+                                                       min="100"
+                                                       max="300"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="KERBD">
+                                            <div class="invalid-feedback" id="KERBD_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="WCTH" class="form-label">
+                                                Wearing Course Thickness
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Thickness of wearing course"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="WCTH" 
+                                                   name="WCTH" 
+                                                   value="75"
+                                                   
+                                                       min="50"
+                                                       max="150"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="WCTH">
+                                            <div class="invalid-feedback" id="WCTH_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-building me-2"></i>
+                            Abutments Parameters
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ABTLEN" class="form-label">
+                                                Abutment Length
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Length of the abutment"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ABTLEN" 
+                                                   name="ABTLEN" 
+                                                   value="10000"
+                                                   
+                                                       min="5000"
+                                                       max="20000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ABTLEN">
+                                            <div class="invalid-feedback" id="ABTLEN_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ABTL" class="form-label">
+                                                Left Abutment Chainage
+                                                
+                                                    <small class="text-muted">(m)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Chainage of the left abutment"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ABTL" 
+                                                   name="ABTL" 
+                                                   value="0"
+                                                   
+                                                       min="0"
+                                                       max="50000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ABTL">
+                                            <div class="invalid-feedback" id="ABTL_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ALCW" class="form-label">
+                                                Left Abutment Cap Width
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Width of left abutment cap excluding dirt wall"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ALCW" 
+                                                   name="ALCW" 
+                                                   value="1200"
+                                                   
+                                                       min="800"
+                                                       max="2000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ALCW">
+                                            <div class="invalid-feedback" id="ALCW_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ALCD" class="form-label">
+                                                Left Abutment Cap Depth
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Depth of left abutment cap"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ALCD" 
+                                                   name="ALCD" 
+                                                   value="800"
+                                                   
+                                                       min="500"
+                                                       max="1500"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ALCD">
+                                            <div class="invalid-feedback" id="ALCD_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ALFL" class="form-label">
+                                                Left Abutment Footing Level
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Footing level of left abutment"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ALFL" 
+                                                   name="ALFL" 
+                                                   value="105000"
+                                                   
+                                                       min="90000"
+                                                       max="145000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ALFL">
+                                            <div class="invalid-feedback" id="ALFL_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ARFL" class="form-label">
+                                                Right Abutment Footing Level
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Footing level of right abutment"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ARFL" 
+                                                   name="ARFL" 
+                                                   value="105000"
+                                                   
+                                                       min="90000"
+                                                       max="145000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ARFL">
+                                            <div class="invalid-feedback" id="ARFL_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ALFB" class="form-label">
+                                                Left Abutment Front Batter
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Front batter ratio for left abutment"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ALFB" 
+                                                   name="ALFB" 
+                                                   value="0.1"
+                                                   
+                                                       min="0"
+                                                       max="0.5"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ALFB">
+                                            <div class="invalid-feedback" id="ALFB_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ALFBL" class="form-label">
+                                                Left Abutment Front Batter RL
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Reference level for left abutment front batter"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ALFBL" 
+                                                   name="ALFBL" 
+                                                   value="108000"
+                                                   
+                                                       min="90000"
+                                                       max="145000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ALFBL">
+                                            <div class="invalid-feedback" id="ALFBL_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ALFBR" class="form-label">
+                                                Right Abutment Front Batter RL
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Reference level for right abutment front batter"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ALFBR" 
+                                                   name="ALFBR" 
+                                                   value="108000"
+                                                   
+                                                       min="90000"
+                                                       max="145000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ALFBR">
+                                            <div class="invalid-feedback" id="ALFBR_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ALTB" class="form-label">
+                                                Left Abutment Toe Batter
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Toe batter ratio for left abutment"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ALTB" 
+                                                   name="ALTB" 
+                                                   value="0.1"
+                                                   
+                                                       min="0"
+                                                       max="0.5"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ALTB">
+                                            <div class="invalid-feedback" id="ALTB_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ALTBL" class="form-label">
+                                                Left Abutment Toe Batter Level
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Footing top level for left abutment toe batter"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ALTBL" 
+                                                   name="ALTBL" 
+                                                   value="107000"
+                                                   
+                                                       min="90000"
+                                                       max="145000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ALTBL">
+                                            <div class="invalid-feedback" id="ALTBL_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ALTBR" class="form-label">
+                                                Right Abutment Toe Batter Level
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Footing top level for right abutment toe batter"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ALTBR" 
+                                                   name="ALTBR" 
+                                                   value="107000"
+                                                   
+                                                       min="90000"
+                                                       max="145000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ALTBR">
+                                            <div class="invalid-feedback" id="ALTBR_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ALFO" class="form-label">
+                                                Left Abutment Front Offset to Footing
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Front offset to footing for left abutment"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ALFO" 
+                                                   name="ALFO" 
+                                                   value="500"
+                                                   
+                                                       min="200"
+                                                       max="1000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ALFO">
+                                            <div class="invalid-feedback" id="ALFO_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ALFD" class="form-label">
+                                                Left Abutment Footing Depth
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Depth of left abutment footing"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ALFD" 
+                                                   name="ALFD" 
+                                                   value="1000"
+                                                   
+                                                       min="500"
+                                                       max="2000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ALFD">
+                                            <div class="invalid-feedback" id="ALFD_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ALBB" class="form-label">
+                                                Left Abutment Back Batter
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Back batter ratio for left abutment"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ALBB" 
+                                                   name="ALBB" 
+                                                   value="0.05"
+                                                   
+                                                       min="0"
+                                                       max="0.3"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ALBB">
+                                            <div class="invalid-feedback" id="ALBB_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ALBBL" class="form-label">
+                                                Left Abutment Back Batter RL
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Reference level for left abutment back batter"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ALBBL" 
+                                                   name="ALBBL" 
+                                                   value="108000"
+                                                   
+                                                       min="90000"
+                                                       max="145000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ALBBL">
+                                            <div class="invalid-feedback" id="ALBBL_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="ALBBR" class="form-label">
+                                                Right Abutment Back Batter RL
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Reference level for right abutment back batter"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="ALBBR" 
+                                                   name="ALBBR" 
+                                                   value="108000"
+                                                   
+                                                       min="90000"
+                                                       max="145000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="ALBBR">
+                                            <div class="invalid-feedback" id="ALBBR_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="DWTH" class="form-label">
+                                                Dirt Wall Thickness
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Thickness of dirt wall"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="DWTH" 
+                                                   name="DWTH" 
+                                                   value="300"
+                                                   
+                                                       min="200"
+                                                       max="500"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="DWTH">
+                                            <div class="invalid-feedback" id="DWTH_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-columns me-2"></i>
+                            Piers Parameters
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="CAPT" class="form-label">
+                                                Pier Cap Top RL
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Top level of pier cap"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="CAPT" 
+                                                   name="CAPT" 
+                                                   value="109000"
+                                                   
+                                                       min="90000"
+                                                       max="145000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="CAPT">
+                                            <div class="invalid-feedback" id="CAPT_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="CAPB" class="form-label">
+                                                Pier Cap Bottom RL
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Bottom level of pier cap"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="CAPB" 
+                                                   name="CAPB" 
+                                                   value="108000"
+                                                   
+                                                       min="90000"
+                                                       max="145000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="CAPB">
+                                            <div class="invalid-feedback" id="CAPB_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="CAPW" class="form-label">
+                                                Pier Cap Width
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Width of pier cap"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="CAPW" 
+                                                   name="CAPW" 
+                                                   value="2000"
+                                                   
+                                                       min="1000"
+                                                       max="4000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="CAPW">
+                                            <div class="invalid-feedback" id="CAPW_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="PIERTW" class="form-label">
+                                                Pier Top Width
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Top width of pier"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="PIERTW" 
+                                                   name="PIERTW" 
+                                                   value="1500"
+                                                   
+                                                       min="800"
+                                                       max="3000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="PIERTW">
+                                            <div class="invalid-feedback" id="PIERTW_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="BATTR" class="form-label">
+                                                Pier Batter
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Batter ratio for pier"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="BATTR" 
+                                                   name="BATTR" 
+                                                   value="0.02"
+                                                   
+                                                       min="0"
+                                                       max="0.1"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="BATTR">
+                                            <div class="invalid-feedback" id="BATTR_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="PIERST" class="form-label">
+                                                Pier Straight Length
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Straight length of pier"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="PIERST" 
+                                                   name="PIERST" 
+                                                   value="5000"
+                                                   
+                                                       min="2000"
+                                                       max="15000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="PIERST">
+                                            <div class="invalid-feedback" id="PIERST_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="PIERN" class="form-label">
+                                                Pier Serial Number
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Serial number of pier"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="PIERN" 
+                                                   name="PIERN" 
+                                                   value="1"
+                                                   
+                                                       min="1"
+                                                       max="20"
+                                                       step="1"
+                                                   
+                                                   data-param-key="PIERN">
+                                            <div class="invalid-feedback" id="PIERN_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="FUTRL" class="form-label">
+                                                Foundation RL
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Foundation level"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="FUTRL" 
+                                                   name="FUTRL" 
+                                                   value="100000"
+                                                   
+                                                       min="85000"
+                                                       max="140000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="FUTRL">
+                                            <div class="invalid-feedback" id="FUTRL_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="FUTD" class="form-label">
+                                                Foundation Depth
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Depth of foundation"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="FUTD" 
+                                                   name="FUTD" 
+                                                   value="2000"
+                                                   
+                                                       min="1000"
+                                                       max="5000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="FUTD">
+                                            <div class="invalid-feedback" id="FUTD_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="FUTW" class="form-label">
+                                                Foundation Width
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Width of foundation"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="FUTW" 
+                                                   name="FUTW" 
+                                                   value="3000"
+                                                   
+                                                       min="2000"
+                                                       max="8000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="FUTW">
+                                            <div class="invalid-feedback" id="FUTW_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="FUTL" class="form-label">
+                                                Foundation Length
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Length of foundation"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="FUTL" 
+                                                   name="FUTL" 
+                                                   value="8000"
+                                                   
+                                                       min="5000"
+                                                       max="20000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="FUTL">
+                                            <div class="invalid-feedback" id="FUTL_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-road me-2"></i>
+                            Approach Parameters
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="LASLAB" class="form-label">
+                                                Approach Slab Length
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Length of approach slab"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="LASLAB" 
+                                                   name="LASLAB" 
+                                                   value="5000"
+                                                   
+                                                       min="2000"
+                                                       max="10000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="LASLAB">
+                                            <div class="invalid-feedback" id="LASLAB_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="APWTH" class="form-label">
+                                                Approach Slab Width
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Width of approach slab"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="APWTH" 
+                                                   name="APWTH" 
+                                                   value="8000"
+                                                   
+                                                       min="5000"
+                                                       max="15000"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="APWTH">
+                                            <div class="invalid-feedback" id="APWTH_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                                
+                                    
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="form-group">
+                                            <label for="APTHK" class="form-label">
+                                                Approach Slab Thickness
+                                                
+                                                    <small class="text-muted">(mm)</small>
+                                                
+                                                <i class="fas fa-info-circle text-info ms-1" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Thickness of approach slab"></i>
+                                            </label>
+                                            <input type="number" 
+                                                   class="form-control parameter-input" 
+                                                   id="APTHK" 
+                                                   name="APTHK" 
+                                                   value="200"
+                                                   
+                                                       min="150"
+                                                       max="400"
+                                                       step="0.1"
+                                                   
+                                                   data-param-key="APTHK">
+                                            <div class="invalid-feedback" id="APTHK_error"></div>
+                                        </div>
+                                    </div>
+                                
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card bg-primary">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-center align-items-center flex-wrap gap-3">
+                            <button type="button" id="validateBtn" class="btn btn-outline-light">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Validate Parameters
+                            </button>
+                            <button type="button" id="resetBtn" class="btn btn-outline-light">
+                                <i class="fas fa-undo me-2"></i>
+                                Reset to Defaults
+                            </button>
+                            <button type="submit" formaction="/preview" class="btn btn-info btn-lg me-3">
+                                <i class="fas fa-eye me-2"></i>
+                                Preview Drawing
+                            </button>
+                            <div class="btn-group" role="group">
+                                <button type="submit" name="file_format" value="dxf" id="generateDxfBtn" class="btn btn-light btn-lg">
+                                    <i class="fas fa-cube me-2"></i>
+                                    Generate DXF
+                                </button>
+                                <button type="submit" name="file_format" value="pdf" id="generatePdfBtn" class="btn btn-warning btn-lg">
+                                    <i class="fas fa-file-pdf me-2"></i>
+                                    Generate PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Validation Results -->
+    <div id="validationResults" class="mt-4" style="display: none;">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-clipboard-check me-2"></i>
+                    Parameter Validation Results
+                </h6>
+            </div>
+            <div class="card-body">
+                <div id="validationContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Engineering Notes -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-info">
+                <div class="card-header bg-info">
+                    <h6 class="card-title text-white mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Engineering Notes
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Parameter Guidelines:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-arrow-right text-primary me-2"></i>All dimensions in millimeters unless noted</li>
+                                <li><i class="fas fa-arrow-right text-primary me-2"></i>Bridge length should match span count × span length</li>
+                                <li><i class="fas fa-arrow-right text-primary me-2"></i>Top RL must be above soffit level</li>
+                                <li><i class="fas fa-arrow-right text-primary me-2"></i>Slab thickness: center > edge > tip</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Output Information:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>DXF file compatible with AutoCAD</li>
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>PDF file for A4 landscape printing</li>
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>Full-scale technical drawings</li>
+                                <li><i class="fas fa-arrow-right text-success me-2"></i>Professional dimensioning and labels</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8">
+                    <h6>Professional Bridge Design Tool</h6>
+                    <p class="mb-0">Generate accurate CAD drawings for slab bridges with engineering precision.</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <small class="text-muted">
+                        <i class="fas fa-drafting-compass me-1"></i>
+                        Engineering CAD Solution
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/bridge-form.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="/static/js/app.js"></script>
+    
+    
+<script>
+// Initialize tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+});
+</script>
+
+</body>
+</html>
